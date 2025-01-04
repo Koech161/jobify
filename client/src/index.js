@@ -7,15 +7,18 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min'
 import { AuthProvider } from './components/AuthProvider';
 import { UserProvider } from './components/UserContext';
+import { NotificationProvider } from './components/NotificationProvider';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <AuthProvider>
     <UserProvider>
+      <NotificationProvider>
     <React.StrictMode>
     <App />
   </React.StrictMode>
+  </NotificationProvider>
   </UserProvider>
   </AuthProvider>
   

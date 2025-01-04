@@ -7,6 +7,7 @@ import NavBar from './components/NavBar';
 import Register from './components/Register';
 import Login from './components/Login';
 import UserProfile from './components/UserProfile';
+import Notification from './components/Notification';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path='/register' element={<Register />} />
         <Route path='/login' element={<Login />}/>
         <Route path='/profile' element={<UserProfile />} />
+        <Route path='/notification' element={<Notification />} />
       </Routes>
     </div>
    </Router>
