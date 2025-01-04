@@ -1,4 +1,5 @@
 from datetime import timedelta
+import logging
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -17,13 +18,18 @@ from models.user_profile import User_profile
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
 
 load_dotenv()
+UPLOADER_FOLDER = 'files/'
+ALLOWED_EXTENSIONS = {'pdf','txt', 'png', 'jpg', 'jpeg', 'gif'}
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///app.db'
 app.config['SQLACHEMY_TRACK_MODIFICATIONS']=False
 app.json.compact=False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['UPLOADER_FOLDER'] = UPLOADER_FOLDER
 
 CORS(app)
 migrate = Migrate(app,db)
@@ -31,6 +37,14 @@ db.init_app(app)
 
 api = Api(app)
 jwt = JWTManager(app)
+
+if not os.path.exists(UPLOADER_FOLDER):
+    os.makedirs(UPLOADER_FOLDER)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
+
+    
 
 class Home(Resource):
     def get(self):
@@ -71,9 +85,13 @@ class Login(Resource):
 
         if check_password_hash(user.password, password):
             access_token = create_access_token(identity=user.id,expires_delta=timedelta(days=7)) 
-            return {'message': 'Login successfully', 'token': access_token, 'user_id': user.id}, 200
+            return {'message': 'Login successfully', 'token': access_token, 'userId': user.id}, 200
         
         return {'error': 'Invalid credentials'}, 401
+    
+    def get(self,id):
+        user = User.query.get_or_404(id)
+        return user.to_dict(), 200
     
 class Jobs(Resource):
     def post(self):
@@ -107,6 +125,10 @@ class Jobs(Resource):
             return {'error': 'No jobs available'}, 404
         jobs_dict=[job.to_dict() for job in jobs]
         return jobs_dict, 200
+class JobByID(Resource):    
+    def get(self, id):
+        job = Job.query.get_or_404(id)
+        return job.to_dict(), 200
 
 class Applications(Resource):
     def post(self):
@@ -114,15 +136,27 @@ class Applications(Resource):
         job_id = data.get('job_id')
         job_seeker_id= data.get('job_seeker_id')
         cover_letter = data.get('cover_letter')
-        resume_url = data.get('resume_url')
+        # resume_url = data.get('resume_url')
         job_status = data.get('job_status')
         applied_at = data.get('applied_at')
+        
+        if 'resume_url' not in request.files:
+            return {'error': 'Resume file is required'}, 400
+        
+        resume_url = request.files['resume_url']
 
-        if not all([cover_letter, resume_url, job_seeker_id, job_id]):
+        if resume_url.filename == '':
+            return {'error': 'No selected resume file'}, 400
+        if resume_url and allowed_file(resume_url.filename):
+            resume_url_filename = secure_filename(resume_url.filename)
+            resume_path = os.path.join(app.config['UPLOADER_FOLDER'], resume_url_filename)
+            resume_url.save(resume_path)
+
+        if not all([cover_letter, job_seeker_id, job_id]):
             return {'error': 'All Fields are required.'}, 401
         
         new_application = Application(job_id=job_id, job_seeker_id=job_seeker_id, cover_letter=cover_letter, 
-                                      resume_url=resume_url, job_status=job_status, applied_at=applied_at)
+                                      resume_url=resume_path, job_status=job_status, applied_at=applied_at)
         
         try:
             db.session.add(new_application)
@@ -140,26 +174,39 @@ class Applications(Resource):
 
 class User_Profile(Resource):
     def post(self):
-        data = request.get_json()
-        user_id = data.get('user_id')
-        bio = data.get('bio')
-        education = data.get('education')
-        profile_pic = data.get('profile_pic')
-        first_name = data.get('first_name')
-        last_name = data.get('last_name')
-        phone = data.get('phone')
+        logging.info("Received request: %s", request.form)
+        logging.info("Files in request: %s", request.files)
+        user_id = request.form.get('user_id')
+        bio = request.form.get('bio')
+        education = request.form.get('education')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        phone = request.form.get('phone')
+
         
-        new_user_profile = User_profile(user_id=user_id, bio=bio, education=education, profile_pic=profile_pic,
+        if 'profile_picture' not in request.files:
+            return {'error': 'Profile picture is required'}
+        profile_picture = request.files['profile_picture']
+        if profile_picture.filename == '':
+            return {'error': 'No selected profile pictur file'}, 400
+        
+        if profile_picture and allowed_file(profile_picture.filename):
+            profile_pic_filename = secure_filename(profile_picture.filename)
+            profile_pic_path = os.path.join(app.config['UPLOADER_FOLDER'], profile_pic_filename)
+            profile_picture.save(profile_pic_path)
+        
+            new_user_profile = User_profile(user_id=user_id, bio=bio, education=education, profile_picture=profile_pic_path,
                                         first_name=first_name, last_name=last_name, phone=phone)
 
-        try:
-            db.session.add(new_user_profile)
-            db.session.commit()
-            return {'message': 'User profile added successfully', 'user_profile': new_user_profile.user_id},201
-        except Exception as e:
-            db.session.rollback()
-            return {'error': str(e)},500
-        
+            try:
+                db.session.add(new_user_profile)
+                db.session.commit()
+                return jsonify({'message': 'User profile added successfully', 'user_profile': new_user_profile.user_id})
+            except Exception as e:
+                db.session.rollback()
+                return {'error': str(e)},500
+        else:
+            return {'error': 'Invalid profile picture file type'}, 400
     def get(self):
         user_profiles = User_profile.query.all()
         if not user_profiles:
@@ -192,17 +239,24 @@ class Job_Category(Resource):
 class Notifications(Resource):
     def post(self):
         data  = request.get_json()
-        user_id = data.get('user_id')
         message = data.get('message')
         is_read = data.get('is_read')
         created_at = data.get('created_at')
 
-        new_notification = Notification(user_id=user_id, message=message, is_read=is_read, created_at=created_at)
-
+        users = User.query.all()
+        if not users:
+            return {'error': 'No users to send notifications'}, 404
+        
+        
+        notifications =[]
         try:
-            db.session.add(new_notification) 
+            for user in users:
+
+                new_notification = Notification(user_id=user.id, message=message, is_read=is_read, created_at=created_at)
+                db.session.add(new_notification) 
+                notifications.append(new_notification)
             db.session.commit()
-            return {'message': 'New notification created successfully', 'notification': new_notification.id}, 201
+            return {'message': 'New notification created successfully', 'notification': [notif.id for notif in notifications]}, 201
         except Exception as e:
             return {'error': str(e)}, 500   
         
@@ -238,8 +292,9 @@ class Job_search(Resource):
         
 api.add_resource(Home, '/')    
 api.add_resource(Register, '/register')
-api.add_resource(Login, '/login')
+api.add_resource(Login, '/login', '/users/<int:id>')
 api.add_resource(Jobs, '/jobs')
+api.add_resource(JobByID, '/jobs/<int:id>')
 api.add_resource(Applications, '/applications')
 api.add_resource(User_Profile, '/user_profile')
 api.add_resource(Job_Category,'/job_category')

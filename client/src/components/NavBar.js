@@ -38,7 +38,7 @@ const NavBar = () => {
             <Link className="nav-link text-white" to="/notifications">
               Notification
             </Link>
-            <Link className="nav-link text-white" to="/Login">
+            <Link className="nav-link text-white" to="/login">
               Login
             </Link>
             <Link className="nav-link text-white" to="/register">
