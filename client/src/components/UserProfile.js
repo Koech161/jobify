@@ -160,8 +160,8 @@ const UserProfile = () => {
                             <ErrorMessage name="profile_picture" component="div" style={{ color: 'red' }} />
                         </div>
 
-                        <button type="submit" className='btn w-100 bg-primary' disabled={isSubmitting}>
-                            {isSubmitting ? 'Submitting...' : 'Submit'}
+                        <button type="submit" className='btn w-100 bg-primary text-white' disabled={isSubmitting}>
+                            {isSubmitting ? 'Updating...' : 'Update profile'}
                         </button>
                     </Form>
                 )}

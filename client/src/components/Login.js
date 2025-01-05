@@ -64,7 +64,7 @@ function Login() {
                                 className='form-control'/>
                                 <ErrorMessage name='password' component='div' className='text-danger'/>
                             </div>
-                            <button type='submit' className='btn bg-primary w-100' disabled={isSubmitting}>
+                            <button type='submit' className='btn bg-primary w-100 text-white' disabled={isSubmitting}>
                                 {isSubmitting?'Logging in...':'Login'}
                             </button>
                         </Form>

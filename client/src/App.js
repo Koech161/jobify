@@ -8,6 +8,8 @@ import Register from './components/Register';
 import Login from './components/Login';
 import UserProfile from './components/UserProfile';
 import Notification from './components/Notification';
+import AppyJob from './components/AppyJob';
+import Profile from './components/Profile';
 
 function App() {
   return (
@@ -19,8 +21,10 @@ function App() {
         <Route path='/jobs' element={<Job/>} />
         <Route path='/register' element={<Register />} />
         <Route path='/login' element={<Login />}/>
-        <Route path='/profile' element={<UserProfile />} />
+        <Route path='/profi' element={<UserProfile />} />
         <Route path='/notification' element={<Notification />} />
+        <Route path='/application' element={<AppyJob />} />
+        <Route path='/profile' element={<Profile />} />
       </Routes>
     </div>
    </Router>

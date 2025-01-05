@@ -1,7 +1,7 @@
 from datetime import timedelta
 import logging
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Resource, Api
@@ -19,6 +19,8 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
+from flask_socketio import SocketIO, emit
+
 
 load_dotenv()
 UPLOADER_FOLDER = 'files/'
@@ -26,7 +28,7 @@ ALLOWED_EXTENSIONS = {'pdf','txt', 'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///app.db'
-app.config['SQLACHEMY_TRACK_MODIFICATIONS']=False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 app.json.compact=False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['UPLOADER_FOLDER'] = UPLOADER_FOLDER
@@ -38,13 +40,19 @@ db.init_app(app)
 api = Api(app)
 jwt = JWTManager(app)
 
+socketio = SocketIO()
+socketio.init_app(app)
+
+
 if not os.path.exists(UPLOADER_FOLDER):
     os.makedirs(UPLOADER_FOLDER)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
 
-    
+@app.route('/files/<filename>')
+def serve_file(filename):
+    return send_from_directory(app.config['UPLOADER_FOLDER'], filename)    
 
 class Home(Resource):
     def get(self):
@@ -84,7 +92,7 @@ class Login(Resource):
         user = User.query.filter_by(email=email).first()  
 
         if check_password_hash(user.password, password):
-            access_token = create_access_token(identity=user.id,expires_delta=timedelta(days=7)) 
+            access_token = create_access_token(identity=str(user.id),expires_delta=timedelta(days=7)) 
             return {'message': 'Login successfully', 'token': access_token, 'userId': user.id}, 200
         
         return {'error': 'Invalid credentials'}, 401
@@ -131,10 +139,11 @@ class JobByID(Resource):
         return job.to_dict(), 200
 
 class Applications(Resource):
+    @jwt_required()
     def post(self):
-        data = request.get_json()
+        data = request.form
         job_id = data.get('job_id')
-        job_seeker_id= data.get('job_seeker_id')
+        job_seeker_id= get_jwt_identity()
         cover_letter = data.get('cover_letter')
         # resume_url = data.get('resume_url')
         job_status = data.get('job_status')
@@ -177,8 +186,8 @@ class User_Profile(Resource):
         logging.info("Received request: %s", request.form)
         logging.info("Files in request: %s", request.files)
         user_id = request.form.get('user_id')
-        bio = request.form.get('bio')
-        education = request.form.get('education')
+        bio = request.form.get('bio','')
+        education = request.form.get('education','')
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         phone = request.form.get('phone')
@@ -207,11 +216,16 @@ class User_Profile(Resource):
                 return {'error': str(e)},500
         else:
             return {'error': 'Invalid profile picture file type'}, 400
+    @jwt_required()    
     def get(self):
-        user_profiles = User_profile.query.all()
-        if not user_profiles:
-            return {'error': 'User_profiles not available'}, 404
-        return [user_profile.to_dict() for user_profile in user_profiles], 200  
+        user_id  = get_jwt_identity()
+
+        if not user_id:
+            return {'error': 'No User available'}, 400
+        user_prof = User_profile.query.filter_by(user_id=user_id).first()
+        if user_prof and user_prof.profile_picture:
+            user_prof.profile_picture = f'http://127.0.0.1:5555/{user_prof.profile_picture}'
+        return user_prof.to_dict(), 200        
 
 class Job_Category(Resource):
     def post(self):
@@ -237,6 +251,7 @@ class Job_Category(Resource):
         return [job_category.to_dict() for job_category in job_categories], 200
     
 class Notifications(Resource):
+    @jwt_required()
     def post(self):
         data  = request.get_json()
         message = data.get('message')
@@ -256,17 +271,49 @@ class Notifications(Resource):
                 db.session.add(new_notification) 
                 notifications.append(new_notification)
             db.session.commit()
-            return {'message': 'New notification created successfully', 'notification': [notif.id for notif in notifications]}, 201
+
+            for user in users:
+                socketio.emit('new_notification', {
+                    'user_id': user.id,
+                    'message': message,
+                    'is_read': is_read,
+                    'created_at': created_at
+                }, room=user.id)
+            return {'message': 'New notification created successfully',
+                     'notification': [notif.id for notif in notifications]}, 201
         except Exception as e:
             return {'error': str(e)}, 500   
-        
+    @jwt_required()
     def get(self):
-        notifications = Notification.query.all()
+        user_id  = get_jwt_identity()
+        
+        notifications = Notification.query.filter_by(user_id=user_id).all()
 
         if not notifications:
             return {'error': 'Notifications not available'}, 404
         return [notification.to_dict() for notification in notifications], 200 
+class NotificationResource(Resource):
+    def put(self, id):
+        # Get the data from the request
+        data = request.get_json()
+        is_read = data.get('is_read')
 
+        
+        notification = Notification.query.get_or_404(id)
+
+
+        # Update the 'is_read' field
+        notification.is_read = is_read
+
+        try:
+            # Commit the changes to the database
+            db.session.commit()
+            return {'message': 'Notification updated successfully'}, 200
+        except Exception as e:
+            return {'error': str(e)}, 500    
+    def get(self, id):
+        notification= Notification.query.get_or_404(id)
+        return notification.to_dict(), 20
 class Job_search(Resource):
     def post(self):
         data = request.get_json()
@@ -299,6 +346,7 @@ api.add_resource(Applications, '/applications')
 api.add_resource(User_Profile, '/user_profile')
 api.add_resource(Job_Category,'/job_category')
 api.add_resource(Notifications, '/notifications')
+api.add_resource(NotificationResource, '/notifications/<int:id>')
 api.add_resource(Job_search, '/job_search')
 
 if __name__ == '__main__':

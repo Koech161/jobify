@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../service/api';
 import { Modal, Button } from 'react-bootstrap';
+import AppyJob from './AppyJob';
+import { useNavigate } from 'react-router-dom';
 
 const Job = () => {
   const [jobs, setJobs] = useState([]);
@@ -9,6 +11,7 @@ const Job = () => {
   const [error, setError] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -34,6 +37,9 @@ const Job = () => {
     setShowModal(false);
     setSelectedJob(null);
   };
+  const handleNavigate = () => {
+    navigate('/application', {state: {job_id: selectedJob.id}})
+  }
 
   return (
     <div style={{marginTop:'140px'}}>
@@ -75,8 +81,10 @@ const Job = () => {
             <Button variant="secondary" onClick={handleCloseModal}>
               Close
             </Button>
-            <Button variant="primary">Apply Now</Button>
+            <Button variant="primary" onClick={handleNavigate} >Apply Now</Button>
+           
           </Modal.Footer>
+          
         </Modal>
       )}
     </div>

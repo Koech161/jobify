@@ -55,7 +55,7 @@ const Notification = () => {
                         key={notif.id}
                         className={`alert ${notif.is_read ? 'alert-secondary' : 'alert-info'}`}
                         role="alert"
-                        onClick={() => handleNotificationClick(notif.id)}  // On click, mark as read
+                        onClick={() => handleNotificationClick(notif.id)}  
                         style={{ cursor: 'pointer' }}
                     >
                         <strong>{notif.is_read ? 'Read' : 'New'} Notification:</strong> {notif.message}
