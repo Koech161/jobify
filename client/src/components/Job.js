@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 
 const Job = () => {
   const [jobs, setJobs] = useState([]);
+  const [filteredJobs, setFilteredJobs] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -18,6 +20,7 @@ const Job = () => {
       try {
         const res = await api.get('/jobs');
         setJobs(res.data);
+        setFilteredJobs(res.data)
       } catch (error) {
         setError('Error fetching jobs');
         console.error('Error fetching jobs:', error);
@@ -27,6 +30,22 @@ const Job = () => {
     };
     fetchJobs();
   }, []);
+
+  const habdleSearchTerm = (e) => {
+    const term = e.target.value
+    setSearchTerm(term)
+    
+    if (term.trim()) {
+      const filtered = jobs.filter((job) =>
+      job.title.toLowerCase().includes(term.toLowerCase()) ||
+    job.location.toLowerCase().includes(term.toLowerCase()) ||
+    job.job_type.toLowerCase().includes(term.toLowerCase())
+  )
+  setFilteredJobs(filtered)
+    }else {
+      setFilteredJobs(jobs)
+    }
+  }
 
   const handleCardClick = (job) => {
     setSelectedJob(job);
@@ -45,8 +64,16 @@ const Job = () => {
     <div style={{marginTop:'140px'}}>
     <div className="container mt-5 " >
       <h1 className="text-center mb-4">Available Jobs</h1>
+    <div className='d-flex justify-content-center mb-4'>
+      <input
+      type='text'
+      className='form-control w-50'
+      placeholder='Search for jobs...'
+      value={searchTerm}
+      onChange={habdleSearchTerm} />
+    </div>
       <div className="row">
-        {jobs.map((job) => (
+        {filteredJobs.map((job) => (
           <div key={job.id} className="col-md-4 mb-4">
             <div className="card h-100 shadow-sm" onClick={() => handleCardClick(job)}>
               <div className="card-body">
