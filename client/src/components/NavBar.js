@@ -1,12 +1,16 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaBell, FaUserCircle } from 'react-icons/fa';
 import { useAuth } from './AuthProvider';
 
 const NavBar = () => {
   const {logout, isAuthenticated} = useAuth()
+  const navigate = useNavigate()
   const handleLogout = () => {
     logout()
+  }
+  const handlePostJob = () => {
+      navigate('/post-job')
   }
   return (
     <nav className="navbar navbar-expand-lg  fixed-top" style={{ fontSize: '20px',backgroundColor:'#1969e0' }}>
@@ -65,7 +69,7 @@ const NavBar = () => {
             }
            
             
-            <button className='btn bg-success text-white'>Post A Job</button>
+            <button className='btn bg-success text-white' onClick={handlePostJob}>Post A Job</button>
             
           </div>
         </div>

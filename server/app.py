@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 import logging
 import os
 from flask import Flask, request, jsonify, send_from_directory
@@ -116,6 +116,8 @@ class Jobs(Resource):
 
         if not all([employer_id, title, description, salary_range, location]):
             return {'error': 'All fields are required'}, 401
+        if posted_at:
+            posted_at = datetime.fromisoformat(posted_at.replace('Z', '+00:00')) 
         new_job = Job(employer_id=employer_id, title=title, description=description, 
                       requirements=requirements, location=location, salary_range=salary_range,
                         is_active=is_active,job_type=job_type, posted_at=posted_at)

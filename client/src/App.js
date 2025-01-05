@@ -10,6 +10,7 @@ import UserProfile from './components/UserProfile';
 import Notification from './components/Notification';
 import AppyJob from './components/AppyJob';
 import Profile from './components/Profile';
+import PostJob from './components/PostJob';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path='/notification' element={<Notification />} />
         <Route path='/application' element={<AppyJob />} />
         <Route path='/profile' element={<Profile />} />
+        <Route path='/post-job' element={<PostJob />} />
       </Routes>
     </div>
    </Router>
