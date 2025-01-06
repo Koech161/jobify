@@ -31,6 +31,7 @@ app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 app.json.compact=False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['JWT_ALGORITHM'] = 'HS256'
 app.config['UPLOADER_FOLDER'] = UPLOADER_FOLDER
 
 CORS(app)
@@ -172,6 +173,8 @@ class Applications(Resource):
         try:
             db.session.add(new_application)
             db.session.commit()
+            print(f"Resume file saved at: {resume_path}")
+
             return {'message': 'New application successfully', 'applicationId': new_application.id},201
         except Exception as e:
             db.session.rollback()

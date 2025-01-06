@@ -2,10 +2,19 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaBell, FaUserCircle } from 'react-icons/fa';
 import { useAuth } from './AuthProvider';
+import { useUser } from './UserContext';
 
 const NavBar = () => {
   const {logout, isAuthenticated} = useAuth()
+  const {currentUser} = useUser()
   const navigate = useNavigate()
+ 
+  
+  const employer = currentUser.role === 'employer'
+  const username = currentUser.username
+ 
+  
+  
   const handleLogout = () => {
     logout()
   }
@@ -51,7 +60,7 @@ const NavBar = () => {
             {isAuthenticated ? (
               <>
               <Link className="nav-link text-white" to="/profile">
-             <FaUserCircle size={30}/>
+              {username} <FaUserCircle size={30}/>
             </Link>
               <Link className='nav-link text-white' onClick={handleLogout} to='/'>
               Logout</Link>
@@ -67,9 +76,13 @@ const NavBar = () => {
             </>
             
             }
-           
-            
+           {isAuthenticated && employer ? (
+            <>
             <button className='btn bg-success text-white' onClick={handlePostJob}>Post A Job</button>
+            </>
+           ): ''}
+            
+            
             
           </div>
         </div>

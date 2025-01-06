@@ -1,12 +1,13 @@
-import React, { useState } from 'react'
-import { ErrorMessage, Field, Form, Formik, useFormik } from 'formik'
+import React from 'react'
+import { ErrorMessage, Field, Form, Formik} from 'formik'
 import * as  Yup from 'yup'
 import api from '../service/api'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { useNavigate } from 'react-router-dom'
 
 const Register = () => {
-
+    const navigate = useNavigate()
     const initialValues = {
         username: '',
         email: '',
@@ -25,6 +26,7 @@ const Register = () => {
             const res = await api.post('/register', values)
             toast.success(res.data.message )
             resetForm()
+            navigate('/login')
         } catch (error) {
             const errorMessage = error.response?.data?.error || 'Registration Failed'
             toast.error(errorMessage)

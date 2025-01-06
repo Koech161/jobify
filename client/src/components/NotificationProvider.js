@@ -24,7 +24,7 @@ export const NotificationProvider = ({ children }) => {
             }
         };
         fetchNotifications();
-    }, []);
+    }, [token]);
 
     return (
         <NotificationContext.Provider value={{ notifications, setNotifications }}>

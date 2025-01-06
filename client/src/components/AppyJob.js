@@ -4,11 +4,11 @@ import * as Yup from 'yup'
 import api from '../service/api'
 import { ErrorMessage, Field, Form, Formik } from 'formik'
 import { useLocation } from 'react-router-dom'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 const AppyJob = () => {
     const {userId, token} = useAuth()
-   
-    const [error, setError] = useState('')
-    const[message, setMessage] = useState('')
+ 
     const location = useLocation()
     const job_id = location.state?.job_id
     const initialValues = {
@@ -32,6 +32,7 @@ const AppyJob = () => {
     })
     const handleSubmit = async (values, {setSubmitting}) => {
         const formData = new FormData()
+        console.log('Form Values:', values);
 
         Object.keys(values).forEach(key =>{
             if (key !== 'resume_url'){
@@ -44,14 +45,19 @@ const AppyJob = () => {
         try {
             const res = await api.post('/applications', formData, {
                 headers: {
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type':'multipart/form-data',
-                    'Authorization': `Bearer ${token}`
+                    
                 },
             })
-            setMessage('Application successfull')
-            setError('')
+            console.log('response: ',res.data.message);
+            
+            toast.success(res.data.message)
+            
         } catch (error) {
-            setError(error.response ? error.response.data: error.message)
+            console.error("error applying: ",error);
+            
+            toast.error(error.response ? error.response.data: error.message)
         }finally {
             setSubmitting(false)
         }
@@ -61,14 +67,8 @@ const AppyJob = () => {
     <div className='card shadow-sm' style={{width: '40rem'}}>
     <div className='card-body'>
     <h2 className='card-title text-center'>Application Form</h2>
-    {message && typeof message === 'string' && <p className='text-success'>{message}</p>}
-{message && typeof message === 'object' && message.message && <p className='text-success'>{message.message}</p>}
-
-{error && typeof error === 'string' && <p className='text-danger'>{error}</p>}
-{error && typeof error === 'object' && error.message && <p className='text-danger'>{error.message}</p>}
-
-
-    <Formik 
+    
+ <Formik 
     initialValues={initialValues}
     validationSchema={validationSchema}
     onSubmit={handleSubmit}>
@@ -115,6 +115,7 @@ const AppyJob = () => {
 
     </div>
         </div>
+        <ToastContainer />
         </div>
   )
 }

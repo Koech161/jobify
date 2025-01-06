@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react'
 import api from '../service/api'
 import { useAuth } from './AuthProvider'
 import pic from '../assets/375240198_11475217.jpg'
+import { useUser } from './UserContext'
 
 const Profile = () => {
     const [profile, setProfile] = useState({})
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
-    const { token , userId} = useAuth()
+    const { token } = useAuth()
+    const {currentUser} = useUser()
 
     useEffect(() => {
         const fetch_profile = async () => {
@@ -37,11 +39,12 @@ const Profile = () => {
             <div className='card shadow-sm' style={{ width: '30rem' }}>
                 <div className='card-body'>
                     <h2 className='card-title text-center'>{profile.first_name} {profile.last_name}</h2>
+                    <p className='text-center'>@{currentUser.username}</p>
                     <div className='d-flex justify-content-center'>
                     {profile.profile_picture && (
                                 <img
-                                    src={pic}
-                                    // src={profile.profile_picture} 
+                                    // src={pic}
+                                    src={profile.profile_picture} 
                                     alt="Profile"
                                     className="rounded-circle"
                                     style={{ width: '150px', height: '150px', objectFit: 'cover', border:'1px #333'}}

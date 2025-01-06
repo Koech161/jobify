@@ -5,6 +5,7 @@ const api = axios.create({
 })
 
 api.defaults.headers.common['Content-Type']='application/json'
+// api.defaults.headers.common['Content-Type'] ='multipart/form-data'
 api.defaults.timeout = 10000
 
 api.interceptors.response.use(

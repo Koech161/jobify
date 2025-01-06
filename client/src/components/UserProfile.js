@@ -3,10 +3,11 @@ import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import api from '../service/api';
 import { useAuth } from './AuthProvider';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'
 
 const UserProfile = () => {
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
+   
     const { userId } = useAuth();
 
     // Validation schema using Yup
@@ -45,12 +46,12 @@ const UserProfile = () => {
             });
 
             // Handle success
-            setMessage('User profile created successfully!');
-            setError('');
+            toast.success('User profile created successfully!');
+            
             console.log(response.data);
         } catch (error) {
-            setError(error.response ? error.response.data : error.message);
-            setMessage('');
+            toast.error(error.response ? error.response.data : error.message);
+            
         } finally {
             setSubmitting(false);
         }
@@ -62,8 +63,7 @@ const UserProfile = () => {
             <div className='card-body'>
             <h2 className='card-title text-center'>User Profile Form</h2>
 
-            {message && <p style={{ color: 'green' }}>{message}</p>}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+    
 
             <Formik
                 initialValues={{
@@ -168,6 +168,7 @@ const UserProfile = () => {
             </Formik>
         </div>
         </div>
+        <ToastContainer />
         </div>
     );
 };

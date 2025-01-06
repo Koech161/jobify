@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import api from '../service/api';
-import { Modal, Button } from 'react-bootstrap';
-import AppyJob from './AppyJob';
+import { Modal, Button } from 'react-bootstrap';  
 import { useNavigate } from 'react-router-dom';
+import Home from './Home';
+
 
 const Job = () => {
   const [jobs, setJobs] = useState([]);
@@ -19,6 +20,7 @@ const Job = () => {
     const fetchJobs = async () => {
       try {
         const res = await api.get('/jobs');
+        console.log('Fetched jobs:', res.data)
         setJobs(res.data);
         setFilteredJobs(res.data)
       } catch (error) {
@@ -59,7 +61,8 @@ const Job = () => {
   const handleNavigate = () => {
     navigate('/application', {state: {job_id: selectedJob.id}})
   }
-
+const JobsToDisplay = filteredJobs.slice(0,3)
+  
   return (
     <div style={{marginTop:'140px'}}>
     <div className="container mt-5 " >
@@ -109,12 +112,13 @@ const Job = () => {
               Close
             </Button>
             <Button variant="primary" onClick={handleNavigate} >Apply Now</Button>
-           
+        
           </Modal.Footer>
           
         </Modal>
       )}
     </div>
+    <Home Jobs={JobsToDisplay} />
     </div>
   );
 };
