@@ -17,18 +17,18 @@ const AppyJob = () => {
         cover_letter: '',
         status:'pending',
         applied_at: new Date().toISOString(),
-        resume_url: null
+        resume_url: null,
 
     }
     const validationSchema = Yup.object({
         job_id: Yup.string().required('Job ID is required'),
         job_seeker_id: Yup.string().required('Job Seeker ID is required'),
         cover_letter: Yup.string().required('Cover letter is required'),
-        status: Yup.string().required().required('Application status required'),
+        status: Yup.string().required('Application status required'),
         applied_at: Yup.date().required('Application date is required'),
         resume_url: Yup.mixed().required('Resume is required')
                         .test('fileSize', 'file too large', value => value && value.size <= 5 * 1024 *1024)
-                        .test('fileType', 'Unsuported File Format', value => value && ['application/pdf'].includes(value.type))
+                        .test('fileType', 'Unsuported File Format', value => value && ['application/pdf'].includes(value?.type))
     })
     const handleSubmit = async (values, {setSubmitting}) => {
         const formData = new FormData()
@@ -50,14 +50,23 @@ const AppyJob = () => {
                     
                 },
             })
-            console.log('response: ',res.data.message);
+            console.log('response: ',res);
             
             toast.success(res.data.message)
             
         } catch (error) {
-            console.error("error applying: ",error);
-            
-            toast.error(error.response ? error.response.data: error.message)
+            console.error('Error applying:', error);
+
+        if (error.response) {
+            // If the response exists, show the message from the server
+            toast.error(error.response.data || 'An error occurred');
+        } else if (error.request) {
+            // If no response was received, likely due to network or server issues
+            toast.error('No response from server. Please check your internet connection or try again later.');
+        } else {
+            // General error handling for other types of errors
+            toast.error(error.message || 'An unknown error occurred.');
+        }
         }finally {
             setSubmitting(false)
         }

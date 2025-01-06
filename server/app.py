@@ -34,14 +34,17 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['JWT_ALGORITHM'] = 'HS256'
 app.config['UPLOADER_FOLDER'] = UPLOADER_FOLDER
 
-CORS(app)
+CORS(app, resources={r"/socket.io/*": {"origins": "http://localhost:3000"}})
+
 migrate = Migrate(app,db)
 db.init_app(app)
 
 api = Api(app)
 jwt = JWTManager(app)
 
-socketio = SocketIO()
+socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000")
+
+
 socketio.init_app(app)
 
 
@@ -166,7 +169,8 @@ class Applications(Resource):
 
         if not all([cover_letter, job_seeker_id, job_id]):
             return {'error': 'All Fields are required.'}, 401
-        
+        if applied_at:
+            applied_at = datetime.fromisoformat(applied_at.replace('Z', '+00:00'))
         new_application = Application(job_id=job_id, job_seeker_id=job_seeker_id, cover_letter=cover_letter, 
                                       resume_url=resume_path, job_status=job_status, applied_at=applied_at)
         

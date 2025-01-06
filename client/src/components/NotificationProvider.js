@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import api from '../service/api';
 import { useAuth } from './AuthProvider';
-
+import io from 'socket.io-client'
 const NotificationContext = createContext();
 
 export const useNotifications = () => {
@@ -10,21 +10,28 @@ export const useNotifications = () => {
 
 export const NotificationProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
-    const  {token} = useAuth()
+    const  {token, userId} = useAuth()
+    const socket = io('http://127.0.0.1:5555')
     // Fetch notifications when the component mounts
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
                 const response = await api.get('/notifications', {
                     headers: {'Authorization' : `Bearer ${token}`}
-                });  // Adjust the API endpoint
-                setNotifications(response.data);
+                });
+                setNotifications(response.data || []);
             } catch (error) {
                 console.error('Error fetching notifications:', error);
             }
         };
         fetchNotifications();
-    }, [token]);
+        socket.on('new_notification', (notification) => {
+            setNotifications(prevNotifications => [notification, ...prevNotifications])
+        })
+        return () => {
+            socket.off('new_notification')
+        }
+    }, [token, socket]);
 
     return (
         <NotificationContext.Provider value={{ notifications, setNotifications }}>
