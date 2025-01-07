@@ -34,7 +34,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['JWT_ALGORITHM'] = 'HS256'
 app.config['UPLOADER_FOLDER'] = UPLOADER_FOLDER
 
-CORS(app, resources={r"/socket.io/*": {"origins": "http://localhost:3000"}})
+CORS(app)
 
 migrate = Migrate(app,db)
 db.init_app(app)
@@ -86,6 +86,8 @@ class Register(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': str(e)},500
+
+   
         
 class Login(Resource):
     def post(self):
@@ -183,13 +185,13 @@ class Applications(Resource):
         except Exception as e:
             db.session.rollback()
             return {'error': str(e)}
-        
+       
     def get(self):
         applications = Application.query.all()
         if not applications:
             return {'error': 'Application not available'} ,404
-        return [application.to_dict() for application in applications],200
-
+        return [application.to_dict() for application in applications],200        
+ 
 class User_Profile(Resource):
     def post(self):
         logging.info("Received request: %s", request.form)
@@ -236,6 +238,13 @@ class User_Profile(Resource):
             user_prof.profile_picture = f'http://127.0.0.1:5555/{user_prof.profile_picture}'
         return user_prof.to_dict(), 200        
 
+class Users(Resource):
+
+    def get(self):
+        users = User.query.all()
+        if not users:
+            return {'error': 'No users available'},404
+        return [user.to_dict() for user in users], 200 
 class Job_Category(Resource):
     def post(self):
         data = request.get_json()
@@ -349,6 +358,7 @@ class Job_search(Resource):
 api.add_resource(Home, '/')    
 api.add_resource(Register, '/register')
 api.add_resource(Login, '/login', '/users/<int:id>')
+api.add_resource(Users, '/user')
 api.add_resource(Jobs, '/jobs')
 api.add_resource(JobByID, '/jobs/<int:id>')
 api.add_resource(Applications, '/applications')
