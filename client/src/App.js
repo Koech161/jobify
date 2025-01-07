@@ -11,6 +11,7 @@ import Notification from './components/Notification';
 import AppyJob from './components/AppyJob';
 import Profile from './components/Profile';
 import PostJob from './components/PostJob';
+import EmployerDashboard from './components/EmployerDashboard';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path='/application' element={<AppyJob />} />
         <Route path='/profile' element={<Profile />} />
         <Route path='/post-job' element={<PostJob />} />
+        <Route path='/employer/*' element={<EmployerDashboard />} />
       </Routes>
     </div>
    </Router>

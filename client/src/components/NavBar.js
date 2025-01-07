@@ -79,6 +79,7 @@ const NavBar = () => {
            {isAuthenticated && employer ? (
             <>
             <button className='btn bg-success text-white' onClick={handlePostJob}>Post A Job</button>
+            <Link  className='nav-link text-white' to='/employer/*'>Dashboard</Link>
             </>
            ): ''}
             

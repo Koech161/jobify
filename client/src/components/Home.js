@@ -28,11 +28,12 @@ const Home = ({ Jobs }) => {
           {Jobs && Jobs.length > 0 ? (
             Jobs.map((job) => (
               <div className="col-md-4" key={job.id}>
-                <div className="card">
+                <div className="card shadow-sm">
                   <div className="card-body">
-                    <h5 className="card-title">{job.title}</h5>
+                    <h5 className="card-title"><strong>{job.title}</strong></h5>
                     
-                    <p className="card-text">{job.description || 'No description available.'}</p>
+                    <p className="card-text"><strong>Location:</strong>  {job.location || 'No description available.'}</p>
+                    <p className='card-text'><strong>Job Type:</strong> {job.job_type}</p>
                     <button className="btn btn-primary">Apply Now</button>
                   </div>
                 </div>
