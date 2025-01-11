@@ -8,13 +8,14 @@ import { useUser } from './UserContext';
 const EmployerDashboard = () => {
     const {currentUser} = useUser()
     return (
-        <div className='bg-dark'>
+        <div className=''>
         <div className="d-flex">
             {/* Sidebar */}
-            <div className="bg-dark p-3 shadow text-white" style={{ width: '200px', position: 'fixed', height: '100vh' }}>
+            <div className=" p-3 shadow text-primary" style={{ width: '200px', position: 'fixed', height: '100vh' , marginTop:'70px'}}>
                 <h3>Employer Dashboard</h3>
                 <ul className="list-unstyled">
-                    <li>Welcome {currentUser.username}</li>
+                   <strong><li className='fw-bolder'>Welcome {currentUser.username}</li></strong> 
+                   <hr />
                     <li className="mb-3">
                         <Link to="/employer/users" className="text-decoration-none">Users</Link>
                     </li>

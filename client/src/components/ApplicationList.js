@@ -18,13 +18,14 @@ const ApplicationList = () => {
     },[])
   return (
     <div style={{marginTop:'100px'}}>
-        <table className='table table-dark'>
+        <table className='table table-ligth'>
             <thead>
                 <tr>
                     <th className='fw-bolder'>ID</th>
                     <th className='fw-bolder'>Job ID</th>
                     <th className='fw-bolder'>Job Seeker ID</th>
                     <th className='fw-bolder'>Cover Letter</th>
+                    <th className='fw-bolder'>Resume</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,6 +35,7 @@ const ApplicationList = () => {
                         <td>{appl.job_id}</td>
                         <td>{appl.job_seeker_id}</td>
                         <td>{appl.cover_letter}</td>
+                        <td> <a href={appl.resume_url} target='__blank' rel='noopener noreffer'>Download Resume</a></td>
                     </tr>
                 ))}
             </tbody>

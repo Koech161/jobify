@@ -32,9 +32,11 @@ export const NotificationProvider = ({ children }) => {
             socket.off('new_notification')
         }
     }, [token, socket]);
-
+    const unreadCount = notifications.filter((notif) => {
+        return notif != notif.is_read
+    }).length
     return (
-        <NotificationContext.Provider value={{ notifications, setNotifications }}>
+        <NotificationContext.Provider value={{ notifications, setNotifications, unreadCount }}>
             {children}
         </NotificationContext.Provider>
     );

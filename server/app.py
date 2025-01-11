@@ -190,7 +190,13 @@ class Applications(Resource):
         applications = Application.query.all()
         if not applications:
             return {'error': 'Application not available'} ,404
-        return [application.to_dict() for application in applications],200        
+        result = []
+        for application in applications:
+
+            if application and application.resume_url:
+                application.resume_url = f'http://127.0.0.1:5555/{application.resume_url}'
+                result.append(application.to_dict())
+        return result, 200       
  
 class User_Profile(Resource):
     def post(self):

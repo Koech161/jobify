@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaBell, FaUserCircle } from 'react-icons/fa';
 import { useAuth } from './AuthProvider';
 import { useUser } from './UserContext';
+import { useNotifications } from './NotificationProvider';
 
 const NavBar = () => {
   const {logout, isAuthenticated} = useAuth()
+  const {unreadCount} = useNotifications()
   const {currentUser} = useUser()
   const navigate = useNavigate()
  
@@ -52,8 +54,14 @@ const NavBar = () => {
               Browse Jobs
             </Link>
 
-            <Link className="nav-link text-white" to="/notification">
-              <FaBell size={30}/>
+            <Link className="nav-link text-white position-relative" to="/notification">
+              <FaBell size={30}/> {unreadCount > 0 &&(
+                <span className='position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger'>
+                  {unreadCount}
+                  <span className='visually-hidden'>unread Notifications</span>
+                  
+                </span>
+              )}
             </Link>
 
             

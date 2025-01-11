@@ -20,7 +20,7 @@ const UsersList = () => {
   return (
     <div style={{ marginTop: '100px' }}>
             <h2 className='text-center'>Users</h2>
-            <table className='table table-dark'>
+            <table className='table table-ligth'>
                 <thead>
                     <tr>
                         <th className='fw-bolder'>ID</th>
