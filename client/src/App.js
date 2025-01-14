@@ -12,6 +12,7 @@ import AppyJob from './components/AppyJob';
 import Profile from './components/Profile';
 import PostJob from './components/PostJob';
 import EmployerDashboard from './components/EmployerDashboard';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path='/post-job' element={<PostJob />} />
         <Route path='/employer/*' element={<EmployerDashboard />} />
       </Routes>
+      <Footer />
     </div>
    </Router>
   );

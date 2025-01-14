@@ -240,6 +240,8 @@ class User_Profile(Resource):
         if not user_id:
             return {'error': 'No User available'}, 400
         user_prof = User_profile.query.filter_by(user_id=user_id).first()
+        if user_prof is None:
+            return {'message': 'user profile not found'}
         if user_prof and user_prof.profile_picture:
             user_prof.profile_picture = f'http://127.0.0.1:5555/{user_prof.profile_picture}'
         return user_prof.to_dict(), 200        

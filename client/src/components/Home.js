@@ -1,5 +1,8 @@
 import React from 'react';
 import heroImg from '../assets/rb_61993.png';
+import How_it_works from './How_it_works';
+import Why_us from './Why_us';
+import Testimonial from './Testimonial';
 
 const Home = ({ Jobs }) => {
  
@@ -22,30 +25,11 @@ const Home = ({ Jobs }) => {
         </div>
       </div>
       
-      <div className="container mt-5">
-        <h3 className="mb-4">Browse Jobs</h3>
-        <div className="row">
-          {Jobs && Jobs.length > 0 ? (
-            Jobs.map((job) => (
-              <div className="col-md-4" key={job.id}>
-                <div className="card shadow-sm">
-                  <div className="card-body">
-                    <h5 className="card-title"><strong>{job.title}</strong></h5>
-                    
-                    <p className="card-text"><strong>Location:</strong>  {job.location || 'No description available.'}</p>
-                    <p className='card-text'><strong>Job Type:</strong> {job.job_type}</p>
-                    <button className="btn btn-primary">Apply Now</button>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="col-12">
-              <p>No jobs available at the moment. Please check back later!</p>
-            </div>
-          )}
-        </div>
-      </div>
+      <How_it_works />
+
+      <Why_us />
+
+      <Testimonial />
     </div>
   );
 };

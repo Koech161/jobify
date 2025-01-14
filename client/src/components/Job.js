@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../service/api';
 import { Modal, Button } from 'react-bootstrap';  
 import { useNavigate } from 'react-router-dom';
-import Home from './Home';
+
 
 
 const Job = () => {
@@ -33,7 +33,7 @@ const Job = () => {
     fetchJobs();
   }, []);
 
-  const habdleSearchTerm = (e) => {
+  const handleSearchTerm = (e) => {
     const term = e.target.value
     setSearchTerm(term)
     
@@ -41,7 +41,9 @@ const Job = () => {
       const filtered = jobs.filter((job) =>
       job.title.toLowerCase().includes(term.toLowerCase()) ||
     job.location.toLowerCase().includes(term.toLowerCase()) ||
-    job.job_type.toLowerCase().includes(term.toLowerCase())
+    job.job_type.toLowerCase().includes(term.toLowerCase()) ||
+    job.salary_range.toLowerCase().includes(term.toLowerCase()) ||
+    job.requirements.toLowerCase().includes(term.toLowerCase())
   )
   setFilteredJobs(filtered)
     }else {
@@ -73,7 +75,7 @@ const JobsToDisplay = filteredJobs.slice(0,3)
       className='form-control w-50'
       placeholder='Search for jobs...'
       value={searchTerm}
-      onChange={habdleSearchTerm} />
+      onChange={handleSearchTerm} />
     </div>
       <div className="row">
         {filteredJobs.map((job) => (
@@ -118,7 +120,7 @@ const JobsToDisplay = filteredJobs.slice(0,3)
         </Modal>
       )}
     </div>
-    <Home Jobs={JobsToDisplay} />
+    
     </div>
   );
 };

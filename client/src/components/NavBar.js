@@ -17,8 +17,8 @@ const NavBar = () => {
  
   
   
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
   }
   const handlePostJob = () => {
       navigate('/post-job')

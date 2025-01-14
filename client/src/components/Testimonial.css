@@ -1,0 +1,23 @@
+.testimonial-container {
+    max-width: 100%;
+    padding: 20px 0;
+  }
+  
+  .testimonial-cards {
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    display: flex;
+  }
+  
+  .testimonial-cards .card {
+    scroll-snap-align: start;
+    min-width: 100%;
+    flex-shrink: 0; /* Prevent shrinking of the cards */
+    margin-right: 15px;
+  }
+  .reduced-img {
+    width: 80px; /* Adjust the width as needed */
+    height: 80px; /* Adjust the height as needed */
+    object-fit: cover; /* Ensures the image maintains aspect ratio */
+  }
+  
